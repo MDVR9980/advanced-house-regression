@@ -23,3 +23,4 @@ The goal is to predict the final sale price of each house based on a rich set of
 
 ## 📁 Project Structure
 
+Dataset link : https://raw.githubusercontent.com/ageron/handson-ml/master/datasets/housing/housing.csv
