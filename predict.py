@@ -1,12 +1,11 @@
 import joblib
 import pandas as pd
 
-# Load the scaler, model, and label encoder
+# Load the scaler and trained model
 scaler = joblib.load('scaler.pkl')
 model = joblib.load('linear_regression_model.pkl')
-label_encoder = joblib.load('label_encoder.pkl')
 
-# Example new data for prediction (you can replace this with actual new data)
+# Example new data for prediction
 new_data = {
     'longitude': [-122.23],
     'latitude': [37.88],
@@ -16,19 +15,38 @@ new_data = {
     'population': [322.0],
     'households': [126.0],
     'median_income': [8.3252],
-    'ocean_proximity': ['NEAR BAY']  # Categorical data
+    'ocean_proximity': ['NEAR BAY']
 }
 
-# Convert new data to DataFrame
+# Convert to DataFrame
 new_df = pd.DataFrame(new_data)
 
-# Step 1: Convert categorical column 'ocean_proximity' to numeric
-new_df['ocean_proximity'] = label_encoder.transform(new_df['ocean_proximity'])
+# One-hot encode 'ocean_proximity'
+new_df = pd.get_dummies(new_df, columns=['ocean_proximity'], drop_first=True)
 
-# Step 2: Scale the features using the loaded scaler
+# Load training data columns (from processed training data)
+# We extract the columns used during training to match them exactly
+X_train, _, _, _ = joblib.load('prepared_data.pkl')
+original_columns = pd.get_dummies(
+    pd.read_csv('housing.csv')
+    .drop('median_house_value', axis=1)
+    .select_dtypes(include=['number', 'object']),
+    columns=['ocean_proximity'],
+    drop_first=True
+).columns
+
+# Add any missing columns in new_df with 0s
+for col in original_columns:
+    if col not in new_df.columns:
+        new_df[col] = 0
+
+# Ensure column order matches training data
+new_df = new_df[original_columns]
+
+# Scale the data
 new_data_scaled = scaler.transform(new_df)
 
-# Step 3: Predict the price using the trained model
+# Predict
 predicted_price = model.predict(new_data_scaled)
 
 print(f"Predicted House Price: {predicted_price[0]}")

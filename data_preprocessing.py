@@ -34,7 +34,8 @@ scaler = StandardScaler()
 X_train_scaled = scaler.fit_transform(X_train)
 X_test_scaled = scaler.transform(X_test)
 
-# Save the preprocessed data
+# Save the preprocessed data and the scaler
 joblib.dump((X_train_scaled, X_test_scaled, y_train, y_test), 'prepared_data.pkl')
+joblib.dump(scaler, 'scaler.pkl')  # ⬅️ این خط اضافه شد
 
 print("Data preprocessing completed and saved.")
